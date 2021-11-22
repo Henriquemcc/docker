@@ -19,7 +19,9 @@ services:
     container_name: my_nextcloud_db
     image: mariadb
     restart: always
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    networks:
+      bridge:
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --skip-innodb-read-only-compressed
     volumes:
       - db:/var/lib/mysql
     environment:
@@ -37,6 +39,8 @@ services:
     networks:
       my_network:
         ipv4_address: 192.168.0.253
+      bridge:
+
     links:
       - db
     volumes:
@@ -59,3 +63,5 @@ networks:
         - subnet: 192.168.0.0/24
           gateway: 192.168.0.1
           ip_range: 192.168.0.255/28
+  bridge:
+    attachable: true

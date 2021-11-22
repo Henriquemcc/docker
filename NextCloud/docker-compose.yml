@@ -2,32 +2,60 @@ version: '3.8'
 
 volumes:
   nextcloud:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/srv/nextcloud/app'
   db:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/srv/nextcloud/db'
 
 services:
   db:
+    container_name: my_nextcloud_db
     image: mariadb
     restart: always
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     volumes:
       - db:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=
-      - MYSQL_PASSWORD=
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
 
   app:
+    container_name: my_nextcloud_app
     image: nextcloud
     restart: always
     ports:
       - "8080:80"
+    networks:
+      my_network:
+        ipv4_address: 192.168.0.253
     links:
       - db
     volumes:
       - nextcloud:/var/www/html
     environment:
-      - MYSQL_PASSWORD=
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
       - MYSQL_HOST=db
+
+networks:
+  my_network:
+    attachable: true
+    name: my_network
+    driver: macvlan
+    driver_opts:
+      parent: enp0s25
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+          gateway: 192.168.0.1
+          ip_range: 192.168.0.255/28

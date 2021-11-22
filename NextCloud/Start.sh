@@ -20,6 +20,9 @@ run_as_root
 set -a
 source auth.env
 
+# Building container
+docker-compose build --pull
+
 # Updating NextCloud container
 docker-compose up -d
 

@@ -17,19 +17,22 @@ function run_as_root() {
 run_as_root
 
 # Creating nextcloud data folder
-mkdir -p "/srv/nextcloud/application" "/srv/nextcloud/db"
+mkdir -p "/srv/nextcloud/app" "/srv/nextcloud/db"
 
 # Stopping NextCloud
 docker stop my_nextcloud_app
 docker stop my_nextcloud_db
 
 # Removing old NextCloud
-docker rm my_nextcloud_app || exit 1
-docker rm my_nextcloud_db || exit 1
+docker rm my_nextcloud_app
+docker rm my_nextcloud_db
 
 # Reading authentication file
 set -a
 source auth.env
+
+# Building container
+docker-compose build --pull
 
 # Updating NextCloud container
 docker-compose up -d

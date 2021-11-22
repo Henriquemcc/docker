@@ -5,10 +5,12 @@ services:
     container_name: my_gitlab
     image: 'gitlab/gitlab-ce:latest'
     restart: always
-    hostname: 'gitlab.example.com'
+    networks:
+      - my_gitlab_network
+    hostname: '192.168.0.254'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'https://gitlab.example.com'
+        external_url 'https://192.168.0.254'
     ports:
       - '80:80'
       - '443:443'
@@ -17,3 +19,16 @@ services:
       - '/srv/gitlab/config:/etc/gitlab'
       - '/srv/gitlab/logs:/var/log/gitlab'
       - '/srv/gitlab/data:/var/opt/gitlab'
+
+networks:
+  my_gitlab_network:
+    name: my_gitlab_network
+    attachable: true
+    driver: macvlan
+    driver_opts:
+      parent: eth0
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+          gateway: 192.168.0.1
+          ip_range: 192.168.0.254/32

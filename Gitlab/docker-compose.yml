@@ -6,7 +6,8 @@ services:
     image: 'gitlab/gitlab-ce:latest'
     restart: always
     networks:
-      - my_gitlab_network
+      my_network:
+        ipv4_address: 192.168.0.254
     hostname: '192.168.0.254'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
@@ -21,8 +22,9 @@ services:
       - '/srv/gitlab/data:/var/opt/gitlab'
 
 networks:
-  my_gitlab_network:
-    name: my_gitlab_network
+  my_network:
+    attachable: true
+    name: my_network
     driver: macvlan
     driver_opts:
       parent: enp0s25
@@ -30,4 +32,4 @@ networks:
       config:
         - subnet: 192.168.0.0/24
           gateway: 192.168.0.1
-          ip_range: 192.168.0.254/32
+          ip_range: 192.168.0.255/28

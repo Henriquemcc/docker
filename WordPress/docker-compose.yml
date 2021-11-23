@@ -1,31 +1,65 @@
-version: '3.1'
+version: '3.8'
 
 services:
-
   wordpress:
+    container_name: my_wordpress_app
     image: wordpress
     restart: always
     ports:
-      - 8080:80
+      - "8080:80"
+    networks:
+      my_network:
+        ipv4_address: 192.168.0.252
+      bridge:
+
     environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: exampleuser
-      WORDPRESS_DB_PASSWORD: examplepass
-      WORDPRESS_DB_NAME: exampledb
+      WORDPRESS_DB_HOST: wordpress_db
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: $WORDPRESS_DB_PASSWORD
+      WORDPRESS_DB_NAME: wordpress_db
     volumes:
       - wordpress:/var/www/html
 
-  db:
+  wordpress_db:
+    container_name: my_wordpress_db
     image: mysql:5.7
     restart: always
+    networks:
+      bridge:
+
     environment:
-      MYSQL_DATABASE: exampledb
-      MYSQL_USER: exampleuser
-      MYSQL_PASSWORD: examplepass
-      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+      MYSQL_DATABASE: wordpress_db
+      MYSQL_USER: wordpress_user
+      MYSQL_PASSWORD: $WORDPRESS_DB_PASSWORD
+      MYSQL_RANDOM_ROOT_PASSWORD: $MYSQL_RANDOM_ROOT_PASSWORD
     volumes:
       - db:/var/lib/mysql
 
 volumes:
   wordpress:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/srv/wordpress/app'
   db:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/srv/wordpress/db'
+
+networks:
+  my_network:
+    attachable: true
+    name: my_network
+    driver: macvlan
+    driver_opts:
+      parent: enp0s25
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+          gateway: 192.168.0.1
+          ip_range: 192.168.0.255/28
+  bridge:
+    attachable: true

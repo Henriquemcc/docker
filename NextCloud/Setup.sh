@@ -14,6 +14,7 @@ function run_as_root() {
   fi
 }
 
+# Running this script as root
 run_as_root
 
 # Creating nextcloud data folder

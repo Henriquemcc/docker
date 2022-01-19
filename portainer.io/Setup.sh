@@ -17,13 +17,8 @@ function run_as_root() {
 # Running this script as root
 run_as_root
 
-# Reading authentication file
-set -a
-source auth.env
+# Deploying portainer
+docker run -d -p 9001:9001 --name portainer_agent --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/docker/volumes:/var/lib/docker/volumes cr.portainer.io/portainer/agent:2.9.3
 
-# Updating WordPress container
-docker-compose up -d
-
-# Starting WordPress
-docker start my_wordpress_db
-docker start my_wordpress_app
+# Adding port to firewall
+firewall-cmd --add-port=9443/tcp --permanent
